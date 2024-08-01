@@ -1,6 +1,6 @@
 scalar Date
 
-
+# Types
 type Facility implements Timestamps {
     _id: ID!
     nominialPower: Float
@@ -10,6 +10,7 @@ type Facility implements Timestamps {
     updatedAt: Date!
 }
 
+# Inputs
 input FacilityCreateInput {
     name: String!
 }

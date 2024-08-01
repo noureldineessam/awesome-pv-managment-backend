@@ -1,6 +1,6 @@
 scalar Date
 
-
+# Types
 type DataPoint {
     timestamp: Date!
     active_power_kW: Float!
@@ -15,6 +15,7 @@ type Report implements Timestamps {
     updatedAt: Date!
 }
 
+# Inputs
 input DataPointInput {
     timestamp: Date!
     active_power_kW: Float!
