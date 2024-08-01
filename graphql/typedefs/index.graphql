@@ -1,0 +1,32 @@
+# Custom Scalars
+scalar Date
+
+type Query {
+    # User
+    user(_id: ID!): User
+
+    # Report
+    facilityReports(facilityId: ID!): [Report]
+    report(_id: ID!): Report
+
+    # Facility
+    userFacilities: [Facility]
+    facility(_id: ID!): Facility
+}
+
+type Mutation {
+    # Users
+    createUser(user: UserCreateInput!): User!
+    updateUser(_id: ID!, user: UserUpdateInput!): User!
+    deleteUser(_id: ID!): Boolean!
+    loginUser(email: String!, password: String!): AuthPayload
+
+    # Report
+    createReport(report: ReportCreateInput!, facilityId: ID!): Report!
+    deleteReport(_id: ID!, facilityId:ID!): Boolean!
+
+    # Facility
+    createFacility(facility: FacilityCreateInput!): Facility!
+    deleteFacility(_id: ID!): Boolean!
+    updateFacility(_id: ID!, facility: FacilityUpdateInput!): Facility!
+}

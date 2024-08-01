@@ -1,0 +1,26 @@
+scalar Date
+
+
+type DataPoint {
+    timestamp: Date!
+    active_power_kW: Float!
+    energy_kWh: Float!
+}
+
+type Report implements Timestamps {
+    _id: ID!
+    dataPoints: [DataPoint!]!
+    facilityId: ID!
+    createdAt: Date!
+    updatedAt: Date!
+}
+
+input DataPointInput {
+    timestamp: Date!
+    active_power_kW: Float!
+    energy_kWh: Float!
+}
+
+input ReportCreateInput {
+    dataPoints: [DataPointInput!]! 
+}
