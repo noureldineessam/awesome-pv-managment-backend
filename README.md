@@ -48,10 +48,14 @@ To get started with the project, follow these steps:
    - `MONGO_URL`: MongoDB connection string.
    - `JWT_SECRET`: Secret key for JWT.
 
-4. **Start the server:**
+4. **Start the server or run tests:**
 
    ```bash
    npm start
+   ```
+
+   ```bash
+   npm test
    ```
 
    The server will run on the configured port, defaulting to `http://localhost:3001`.
@@ -135,3 +139,75 @@ The backend uses structured error handling with meaningful logging. Errors are l
 2. **Performance Optimization:** Optimize database queries and GraphQL resolvers for better performance.
 3. **Scalability:** Implement a microservices architecture or serverless functions for specific heavy-load tasks.
 4. **Monitoring and Logging:** Integrate with monitoring tools like Sentry for better observability.
+
+
+## Project Tree
+
+```
+awesome-pv-managment
+├─ .gitignore
+├─ README.md
+├─ __tests__
+│  ├─ graphql-utils
+│  │  ├─ mutations.js
+│  │  ├─ queries.js
+│  │  └─ setup-utils.js
+│  ├─ integration
+│  │  └─ GraphQL.test.js
+│  └─ unit
+│     ├─ FacilityService.test.js
+│     └─ UserService.test.js
+├─ app.js
+├─ babel.config.cjs
+├─ config
+│  └─ environment.js
+├─ errors
+│  └─ Errors.js
+├─ graphql
+│  ├─ index.js
+│  ├─ resolvers
+│  │  ├─ facility
+│  │  │  ├─ index.js
+│  │  │  ├─ mutations.js
+│  │  │  └─ queries.js
+│  │  ├─ index.js
+│  │  ├─ report
+│  │  │  ├─ index.js
+│  │  │  ├─ mutations.js
+│  │  │  └─ queries.js
+│  │  └─ user
+│  │     ├─ index.js
+│  │     ├─ mutations.js
+│  │     └─ queries.js
+│  ├─ schema.js
+│  └─ typedefs
+│     ├─ common.graphql
+│     ├─ facility.graphql
+│     ├─ index.graphql
+│     ├─ report.graphql
+│     └─ user.graphql
+├─ index.js
+├─ jest.config.cjs
+├─ middlewares
+│  └─ authVerify.js
+├─ models
+│  ├─ facility.js
+│  ├─ index.js
+│  ├─ report.js
+│  └─ user.js
+├─ package-lock.json
+├─ package.json
+├─ repositories
+│  ├─ FacilityRepository.js
+│  ├─ ReportRepository.js
+│  └─ UserRepository.js
+├─ services
+│  ├─ FacilityService.js
+│  ├─ ReportService.js
+│  └─ UserService.js
+└─ utils
+   ├─ dbConnection.js
+   ├─ jwtHash.js
+   └─ logger.js
+
+```

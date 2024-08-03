@@ -1,16 +1,21 @@
 
 import { userService } from '../../../app.js';
 
+import { UserNotFoundError, AuthenticationError, UserInputError } from '../../../errors/Errors.js';
+
+
 const userQueries = {
-    user: async (_, { _id }) => {
+    user: async (_, { _id }, context) => {
         try {
-            const user = await userService.getUserById(_id);
-            return user || null;
+            if (!context.user) throw new AuthenticationError('Unauthorized');
+            return await userService.getUserById(_id);
         } catch (error) {
-            console.error('Error fetching user:', error);
-            throw new Error('Error fetching user');
+            if (error instanceof UserNotFoundError) {
+                throw new UserInputError(error.message);
+            }
+            throw new Error('Internal server error');
         }
-    }
+    },
 };
 
 

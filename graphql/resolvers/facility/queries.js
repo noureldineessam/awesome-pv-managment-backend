@@ -1,26 +1,31 @@
-
+// resolvers/queries/facilityQueries.js
 import { facilityService } from '../../../app.js';
+
+import { FacilityNotFoundError, InvalidCredentialsError, UserNotFoundError, AuthenticationError, UserInputError } from '../../../errors/Errors.js';
 
 const facilityQueries = {
     facility: async (_, { _id }, { user }) => {
         try {
-            const facility = await facilityService.getUserFacilityById(_id, user.id);
-            return facility || null;
+            if (!user) throw new AuthenticationError('Unauthorized');
+            return await facilityService.getUserFacilityById(_id, user._id);
         } catch (error) {
-            console.error('Error fetching user:', error);
-            throw new Error('Error fetching user');
+            if (error instanceof FacilityNotFoundError || error instanceof InvalidCredentialsError) {
+                throw new UserInputError(error.message);
+            }
+            throw new Error('Internal server error');
         }
     },
     userFacilities: async (_, __, { user }) => {
         try {
-            const facilities = await facilityService.getAllUserFacilities(user.id);
-            return facilities || null;
+            if (!user) throw new AuthenticationError('Unauthorized');
+            return await facilityService.getAllUserFacilities(user._id);
         } catch (error) {
-            console.error('Error fetching user:', error);
-            throw new Error('Error fetching user');
+            if (error instanceof UserNotFoundError) {
+                throw new UserInputError(error.message);
+            }
+            throw new Error('Internal server error');
         }
     },
 };
-
 
 export default facilityQueries;

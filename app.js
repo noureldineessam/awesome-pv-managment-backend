@@ -1,6 +1,4 @@
 import express from 'express';
-
-import startGraphQl from './utils/startGraphQl.js';
 import connectDB from './utils/dbConnection.js';
 import authVerify from './middlewares/authVerify.js';
 
@@ -12,10 +10,15 @@ import { ReportService } from './services/ReportService.js';
 
 import { FacilityRepository } from './repositories/FacilityRepository.js';
 import { FacilityService } from './services/FacilityService.js';
+import apolloServer from './graphql/index.js';
 
-
+// Create Express application
 const app = express();
+let isApolloServerStarted = false;
+app.use(authVerify);
 
+
+// Instantiate repositories and services
 export const userRepository = new UserRepository();
 export const facilityRepository = new FacilityRepository();
 export const reportRepository = new ReportRepository();
@@ -34,9 +37,21 @@ export const facilityService = new FacilityService({
     reportRepository
 });
 
-app.use(authVerify);
-startGraphQl(app);
-connectDB();
+// Define async function to run setup tasks
+async function run(app) {
+    try {
+        await connectDB(); // Connect to the database
+        if (!isApolloServerStarted) {
+            await apolloServer.start();
+            isApolloServerStarted = true;
+        }
+        apolloServer.applyMiddleware({ app });
+    } catch (err) {
+        console.error('Error starting the application:', err);
+    }
+}
 
+// Execute setup
+run(app);
 
-export default app;
+export { app, run };

@@ -1,6 +1,8 @@
 import { logger } from '../utils/logger.js';
 import bcrypt from 'bcryptjs';
-import { generateToken } from '../utils/jwtHash.js'
+import { generateToken } from '../utils/jwtHash.js';
+import { UserNotFoundError, UserAlreadyExistsError, InvalidCredentialsError } from '../errors/Errors.js';
+
 export class UserService {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -12,29 +14,30 @@ export class UserService {
      */
     async getUserById(_id) {
         try {
-            logger.info('Fetching user by ID', { _id: _id });
+            logger.info('Fetching user by ID', { _id });
             const user = await this.userRepository.findById(_id);
-            return user ? user : null;
+            if (!user) throw new UserNotFoundError('User not found');
+            return user;
         } catch (error) {
-            logger.error('Error retrieving user by ID', { message: error.message, stack: error.stack });
-            throw new Error(`Failed to retrieve user: ${error.message}`);
+            logger.error('Error retrieving user by ID', { error });
+            throw error;
         }
     }
 
     /**
      * Saves a new user and returns the saved user.
      * @param user - The user to be saved.
+     * @returns {Promise<User[]>} - A list of users.
      */
     async saveUser(user) {
         try {
-            logger.info('Creating a new user', { user: user });
-
-            let savedUser = await this.userRepository.save(user);
-
-            return savedUser;
+            logger.info('Creating a new user', { user });
+            const existingUser = await this.userRepository.findByEmail(user.email);
+            if (existingUser) throw new UserAlreadyExistsError('User already exists');
+            return await this.userRepository.save(user);
         } catch (error) {
-            logger.error('Error creating user', { message: error.message, stack: error.stack });
-            throw new Error('Failed to create user');
+            logger.error('Error creating user', { error });
+            throw error;
         }
     }
 
@@ -44,19 +47,14 @@ export class UserService {
      */
     async deleteUser(_id) {
         try {
-            logger.info('Deleting user', { _id: _id.toString() });
-
-            const user = await this.userRepository.findById(_id);
-
-            if (user) {
-                await this.userRepository.delete(_id);
-                return true;
-            }
-
-            return false;
+            logger.info('Deleting user', { _id });
+            const user = await this.getUserById(_id);
+            if (!user) throw new UserNotFoundError('User not found');
+            await this.userRepository.delete(_id);
+            return true;
         } catch (error) {
-            logger.error('Error deleting user', { message: error.message, stack: error.stack });
-            throw new Error(`Failed to delete user: ${error.message}`);
+            logger.error('Error deleting user', { error });
+            throw error;
         }
     }
 
@@ -67,18 +65,13 @@ export class UserService {
      */
     async updateUser(_id, user) {
         try {
-            logger.info('Updating user', { _id: _id, user: user });
-
-            const updatedUser = await this.userRepository.update(_id, user);
-
-            if (updatedUser) {
-                return updatedUser;
-            }
-
-            return null;
+            logger.info('Updating user', { _id, user });
+            const existingUser = await this.getUserById(_id);
+            if (!existingUser) throw new UserNotFoundError('User not found');
+            return await this.userRepository.update(_id, user);
         } catch (error) {
-            logger.error('Error updating user', { message: error.message, stack: error.stack });
-            throw new Error(`Failed to update user: ${error.message}`);
+            logger.error('Error updating user', { error });
+            throw error;
         }
     }
 
@@ -89,30 +82,16 @@ export class UserService {
      */
     async loginUser(email, password) {
         try {
-            logger.info('Authenticating user', { email: email });
-
+            logger.info('Authenticating user', { email });
             const user = await this.userRepository.findByEmail(email);
-
-            if (!user) {
-                throw new Error('User not found');
-            }
+            if (!user) throw new UserNotFoundError('User not found');
             const isMatch = await bcrypt.compare(password, user.password);
-
-            if (!isMatch) {
-                throw new Error('Invalid credentials');
-            }
-            const userObject = JSON.parse(JSON.stringify(user)); //TODO: simplify
-
-            const token = generateToken(userObject);
-
-
-            return {
-                user,
-                token,
-            };
+            if (!isMatch) throw new InvalidCredentialsError('Invalid credentials');
+            const token = generateToken(user);
+            return { user, token };
         } catch (error) {
-            logger.error('Error authenticating user', { message: error.message, stack: error.stack });
-            throw new Error(`Failed to authenticate user: ${error.message}`);
+            logger.error('Error authenticating user', { error });
+            throw error;
         }
     }
 }
